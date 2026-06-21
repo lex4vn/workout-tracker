@@ -14,7 +14,8 @@ if ('serviceWorker' in navigator) {
 const DEFAULT_SETTINGS = {
   goalName: "Thử Thách 100 Ngày",
   targetDays: 100,
-  startDate: getLocalDateString(new Date()) // Default start date is today
+  startDate: getLocalDateString(new Date()), // Default start date is today
+  pinCode: ""
 };
 
 let appState = {
@@ -25,6 +26,9 @@ let appState = {
 // LocalStorage Keys
 const STORAGE_KEY_SETTINGS = 'workout_tracker_settings';
 const STORAGE_KEY_LOGS = 'workout_tracker_logs';
+const PIN_LOCK_KEY = 'workout_tracker_pin_lock';
+
+let currentPinInput = "";
 
 // Helper: Format Date to YYYY-MM-DD in local time
 function getLocalDateString(date) {
@@ -61,7 +65,7 @@ function loadState() {
     const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
 
     if (savedSettings) {
-      appState.settings = JSON.parse(savedSettings);
+      appState.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
     } else {
       appState.settings = { ...DEFAULT_SETTINGS };
       saveSettings();
@@ -251,6 +255,14 @@ const DOM = {
   btnCancelImport: document.getElementById('btn-cancel-import'),
   btnCloseImport: document.getElementById('btn-close-import'),
   
+  // PIN Lock Screen
+  pinLockScreen: document.getElementById('pin-lock-screen'),
+  pinDots: document.querySelectorAll('.pin-dot'),
+  pinBtns: document.querySelectorAll('.pin-btn'),
+  pinTitle: document.getElementById('pin-title'),
+  pinSubtitle: document.getElementById('pin-subtitle'),
+  settingsPinCode: document.getElementById('settings-pin-code'),
+
   // Toast Alert
   toast: document.getElementById('toast')
 };
@@ -615,6 +627,9 @@ function renderSettingsView() {
   DOM.settingsGoalName.value = appState.settings.goalName;
   DOM.settingsTargetDays.value = appState.settings.targetDays;
   DOM.settingsStartDate.value = appState.settings.startDate;
+  if (DOM.settingsPinCode) {
+    DOM.settingsPinCode.value = appState.settings.pinCode || "";
+  }
 }
 
 // ==========================================================================
@@ -878,13 +893,14 @@ function setupEventListeners() {
     const goalName = DOM.settingsGoalName.value.trim();
     const targetDays = Number(DOM.settingsTargetDays.value);
     const startDate = DOM.settingsStartDate.value;
+    const pinCode = DOM.settingsPinCode ? DOM.settingsPinCode.value.trim() : "";
 
     if (!goalName || !targetDays || !startDate) {
       showToast("Vui lòng nhập đầy đủ thông tin.");
       return;
     }
 
-    appState.settings = { goalName, targetDays, startDate };
+    appState.settings = { goalName, targetDays, startDate, pinCode };
     saveSettings();
     updateUI();
     showToast("Cập nhật mục tiêu thành công!");
@@ -948,11 +964,135 @@ function setupEventListeners() {
 }
 
 // ==========================================================================
+// PIN LOCK SYSTEM
+// ==========================================================================
+
+function initPinLock() {
+  const lockDataStr = localStorage.getItem(PIN_LOCK_KEY);
+  let lockData = { failedAttempts: 0, lockUntil: 0 };
+  if (lockDataStr) lockData = JSON.parse(lockDataStr);
+
+  const now = Date.now();
+  if (lockData.lockUntil > now) {
+    showPinLock(true, lockData.lockUntil);
+    return;
+  } else if (lockData.lockUntil > 0) {
+    lockData.failedAttempts = 0;
+    lockData.lockUntil = 0;
+    localStorage.setItem(PIN_LOCK_KEY, JSON.stringify(lockData));
+  }
+
+  if (appState.settings.pinCode && appState.settings.pinCode.length === 4) {
+    showPinLock(false);
+  }
+}
+
+function showPinLock(isLockedOut, lockUntilMs) {
+  if (!DOM.pinLockScreen) return;
+  DOM.pinLockScreen.style.display = 'flex';
+  
+  if (isLockedOut) {
+    DOM.pinLockScreen.classList.add('locked');
+    DOM.pinTitle.textContent = "Đã Khóa Ứng Dụng";
+    
+    const unlockDate = new Date(lockUntilMs);
+    DOM.pinSubtitle.textContent = `Thử lại lúc: ${unlockDate.getHours().toString().padStart(2, '0')}:${String(unlockDate.getMinutes()).padStart(2, '0')} ngày ${formatDisplayDate(getLocalDateString(unlockDate))}`;
+    
+    DOM.pinBtns.forEach(btn => btn.disabled = true);
+  } else {
+    DOM.pinLockScreen.classList.remove('locked');
+    DOM.pinTitle.textContent = "Nhập Mã PIN";
+    DOM.pinSubtitle.textContent = "Bảo mật ứng dụng";
+    DOM.pinBtns.forEach(btn => btn.disabled = false);
+    currentPinInput = "";
+    updatePinDots();
+  }
+}
+
+function updatePinDots() {
+  if (!DOM.pinDots) return;
+  DOM.pinDots.forEach((dot, index) => {
+    if (index < currentPinInput.length) {
+      dot.classList.add('filled');
+      dot.classList.remove('error');
+    } else {
+      dot.classList.remove('filled', 'error');
+    }
+  });
+}
+
+function handlePinInput(val) {
+  if (currentPinInput.length < 4) {
+    currentPinInput += val;
+    updatePinDots();
+    
+    if (currentPinInput.length === 4) {
+      setTimeout(verifyPin, 100);
+    }
+  }
+}
+
+function handlePinClear() {
+  if (currentPinInput.length > 0) {
+    currentPinInput = currentPinInput.slice(0, -1);
+    updatePinDots();
+  }
+}
+
+function verifyPin() {
+  const expectedPin = appState.settings.pinCode;
+  if (currentPinInput === expectedPin) {
+    DOM.pinLockScreen.style.display = 'none';
+    currentPinInput = "";
+    localStorage.setItem(PIN_LOCK_KEY, JSON.stringify({ failedAttempts: 0, lockUntil: 0 }));
+  } else {
+    DOM.pinDots.forEach(dot => dot.classList.add('error'));
+    const dotsContainer = document.getElementById('pin-dots');
+    if (dotsContainer) dotsContainer.classList.add('shake');
+    
+    setTimeout(() => {
+      if (dotsContainer) dotsContainer.classList.remove('shake');
+      currentPinInput = "";
+      updatePinDots();
+    }, 400);
+
+    const lockDataStr = localStorage.getItem(PIN_LOCK_KEY);
+    let lockData = { failedAttempts: 0, lockUntil: 0 };
+    if (lockDataStr) lockData = JSON.parse(lockDataStr);
+    
+    lockData.failedAttempts += 1;
+    
+    if (lockData.failedAttempts >= 3) {
+      lockData.lockUntil = Date.now() + (24 * 60 * 60 * 1000);
+      showPinLock(true, lockData.lockUntil);
+    } else {
+      DOM.pinSubtitle.textContent = `Sai mã PIN. Cố gắng lại (${3 - lockData.failedAttempts} lần)`;
+      DOM.pinSubtitle.style.color = 'var(--accent-coral)';
+    }
+    localStorage.setItem(PIN_LOCK_KEY, JSON.stringify(lockData));
+  }
+}
+
+// ==========================================================================
 // APP START
 // ==========================================================================
 
 window.addEventListener('DOMContentLoaded', () => {
   loadState();
   setupEventListeners();
+  
+  if (DOM.pinBtns) {
+    DOM.pinBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (btn.id === 'pin-btn-clear') {
+          handlePinClear();
+        } else if (btn.dataset.val !== undefined) {
+          handlePinInput(btn.dataset.val);
+        }
+      });
+    });
+  }
+
+  initPinLock();
   updateUI();
 });
