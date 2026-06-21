@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#090a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Workout100">
+  
+  <title>100-Day Workout Tracker</title>
+  
+  <!-- Manifest & Favicon -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- App Container -->
+  <div id="app" class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <img src="icon.svg" alt="Logo" class="logo-img" id="logo-icon">
+        <div class="goal-info">
+          <h1 id="app-title">Thử Thách 100 Ngày</h1>
+          <p id="app-subtitle" class="text-glow">Tập Bụng Mỗi Ngày</p>
+        </div>
+      </div>
+      <button id="btn-quick-log" class="btn-primary" aria-label="Ghi nhận nhanh">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Tập Ngay</span>
+      </button>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+      
+      <!-- Dashboard Overview -->
+      <section id="dashboard" class="dashboard-section card-glass">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="120" height="120">
+            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" />
+            <circle class="progress-ring-bar" id="progress-indicator" stroke="url(#progressGrad)" stroke-width="10" stroke-linecap="round" fill="transparent" r="50" cx="60" cy="60" stroke-dasharray="314.16" stroke-dashoffset="314.16" />
+            <defs>
+              <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00f5a0" />
+                <stop offset="100%" stop-color="#00d9f5" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="progress-text">
+            <span id="stat-percent" class="percent-num">0%</span>
+            <span id="stat-fraction" class="fraction-num">0/100 ngày</span>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <div class="metric-icon streak-glow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+            </div>
+            <div class="metric-data">
+              <span class="metric-label">Chuỗi hiện tại</span>
+              <span id="stat-current-streak" class="metric-val">0 ngày</span>
+            </div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-icon record-glow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+            </div>
+            <div class="metric-data">
+              <span class="metric-label">Chuỗi kỷ lục</span>
+              <span id="stat-longest-streak" class="metric-val">0 ngày</span>
+            </div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-icon time-glow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="metric-data">
+              <span class="metric-label">Tổng thời gian</span>
+              <span id="stat-total-minutes" class="metric-val">0 phút</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View 1: 100-Day Grid -->
+      <section id="view-grid" class="view-section active">
+        <div class="section-header">
+          <h2>Hành Trình Chi Tiết</h2>
+          <span class="sub-badge" id="grid-status-badge">Ngày 1/100</span>
+        </div>
+        <div class="grid-container" id="grid-days">
+          <!-- Days will be dynamically generated by JS -->
+        </div>
+      </section>
+
+      <!-- View 2: Analytics & Stats -->
+      <section id="view-stats" class="view-section">
+        <div class="section-header">
+          <h2>Thống Kê Tập Luyện</h2>
+        </div>
+        
+        <!-- SVG Chart Container -->
+        <div class="card-glass chart-card">
+          <h3>Thời gian tập gần đây (phút)</h3>
+          <div class="chart-container" id="chart-duration">
+            <!-- Dynamic SVG chart will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Muscle group / tags breakdown -->
+        <div class="stats-panels-grid">
+          <div class="card-glass panel-tags">
+            <h3>Nhóm cơ tập nhiều nhất</h3>
+            <div class="tags-chart" id="tags-chart-container">
+              <div class="no-data-msg">Chưa có dữ liệu tập luyện</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Logs Feed -->
+        <div class="recent-logs-container">
+          <h3>Nhật ký tập luyện</h3>
+          <div class="logs-list" id="logs-list-container">
+            <!-- Logs will be populated here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- View 3: App Settings -->
+      <section id="view-settings" class="view-section">
+        <div class="section-header">
+          <h2>Cài Đặt Mục Tiêu</h2>
+        </div>
+
+        <div class="card-glass settings-card">
+          <form id="form-settings">
+            <div class="form-group">
+              <label for="settings-goal-name">Tên thử thách / mục tiêu</label>
+              <input type="text" id="settings-goal-name" required placeholder="Ví dụ: Tập Bụng 100 Ngày">
+            </div>
+            
+            <div class="form-group-row">
+              <div class="form-group">
+                <label for="settings-target-days">Số ngày mục tiêu</label>
+                <input type="number" id="settings-target-days" min="7" max="365" required>
+              </div>
+              <div class="form-group">
+                <label for="settings-start-date">Ngày bắt đầu</label>
+                <input type="date" id="settings-start-date" required>
+              </div>
+            </div>
+            
+            <button type="submit" class="btn-accent w-100">Cập nhật mục tiêu</button>
+          </form>
+        </div>
+
+        <div class="section-header" style="margin-top: 2rem;">
+          <h2>Sao Lưu & Khôi Phục</h2>
+        </div>
+
+        <div class="card-glass backup-card">
+          <p class="description">Dữ liệu được lưu cục bộ trên trình duyệt điện thoại. Hãy xuất dữ liệu (JSON) dự phòng để không bị mất khi xóa bộ nhớ cache.</p>
+          <div class="button-group">
+            <button id="btn-export-data" class="btn-outline">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Xuất Dữ Liệu</span>
+            </button>
+            <button id="btn-import-data" class="btn-outline">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Nhập Dữ Liệu</span>
+            </button>
+          </div>
+          <button id="btn-reset-data" class="btn-danger w-100" style="margin-top: 1rem;">Xóa Hết Dữ Liệu</button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Tab Navigation -->
+    <nav class="app-nav">
+      <button class="nav-item active" data-view="grid" aria-label="Lịch trình">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>Lịch trình</span>
+      </button>
+      <button class="nav-item" data-view="stats" aria-label="Thống kê">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        <span>Thống kê</span>
+      </button>
+      <button class="nav-item" data-view="settings" aria-label="Cài đặt">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <span>Cài đặt</span>
+      </button>
+    </nav>
+
+  </div> <!-- End App Container -->
+
+  <!-- Log Workout Bottom Sheet Modal -->
+  <div id="log-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      
+      <header class="modal-header">
+        <h3 id="modal-title">Ghi nhận: Ngày 1</h3>
+        <button id="btn-close-modal" class="btn-close" aria-label="Đóng">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </header>
+
+      <form id="form-log-workout" class="modal-body">
+        <!-- Day complete toggle -->
+        <div class="form-group-checkbox card-glass-interactive">
+          <label class="checkbox-container">
+            <input type="checkbox" id="log-completed" checked>
+            <span class="custom-checkbox">
+              <svg class="checkmark-svg" viewBox="0 0 24 24">
+                <path d="M4 12 L10 18 L20 6" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </span>
+            <div class="checkbox-labels">
+              <span class="checkbox-title">Hoàn thành buổi tập</span>
+              <span class="checkbox-desc">Đánh dấu bạn đã tập luyện cho ngày này</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Date selector -->
+        <div class="form-group">
+          <label for="log-date">Ngày tập</label>
+          <input type="date" id="log-date" required>
+        </div>
+
+        <!-- Duration slider -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="log-duration">Thời gian tập luyện</label>
+            <span id="log-duration-val" class="value-highlight">15 phút</span>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="log-duration" min="1" max="90" value="15" class="custom-slider">
+            <div class="slider-marks">
+              <span>5m</span>
+              <span>15m</span>
+              <span>30m</span>
+              <span>45m</span>
+              <span>60m+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tag selector chips -->
+        <div class="form-group">
+          <label>Nhóm cơ tập trung</label>
+          <div class="chips-container" id="log-chips">
+            <button type="button" class="chip" data-value="Bụng Trên">Bụng Trên</button>
+            <button type="button" class="chip" data-value="Bụng Dưới">Bụng Dưới</button>
+            <button type="button" class="chip" data-value="Cơ Liên Sườn">Cơ Liên Sườn</button>
+            <button type="button" class="chip" data-value="Cơ Lưng / Core">Cơ Lưng/Core</button>
+            <button type="button" class="chip" data-value="Toàn Thân">Toàn Thân</button>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label for="log-notes">Ghi chú & cảm nhận (Tùy chọn)</label>
+          <textarea id="log-notes" rows="3" placeholder="Ví dụ: Plank 3 hiệp x 1p30s, cảm thấy rất mệt nhưng đã vượt qua..."></textarea>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="modal-actions">
+          <button type="button" id="btn-delete-log" class="btn-danger-outline">Xóa bản ghi</button>
+          <button type="submit" class="btn-primary flex-grow">Lưu nhật ký</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Data Import Dialog Modal -->
+  <div id="import-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <header class="modal-header">
+        <h3>Nhập Dữ Liệu Dự Phòng</h3>
+        <button id="btn-close-import" class="btn-close" aria-label="Đóng">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="description">Dán mã dữ liệu sao lưu JSON của bạn vào đây hoặc chọn tệp dữ liệu đã xuất.</p>
+        <textarea id="import-json-data" rows="8" placeholder="Dán chuỗi dữ liệu JSON vào đây..."></textarea>
+        <div style="margin-top: 1rem;">
+          <label for="import-file" class="btn-outline w-100 text-center" style="display: block; cursor: pointer;">
+            Chọn Tệp Sao Lưu (.json)
+          </label>
+          <input type="file" id="import-file" accept=".json" style="display: none;">
+        </div>
+        <div class="modal-actions" style="margin-top: 1.5rem;">
+          <button type="button" id="btn-cancel-import" class="btn-outline">Hủy</button>
+          <button type="button" id="btn-submit-import" class="btn-accent flex-grow">Nhập dữ liệu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Toast Notification -->
+  <div id="toast" class="toast">Đã lưu thay đổi!</div>
+
+  <!-- Main JavaScript Application -->
+  <script src="app.js"></script>
+</body>
+</html>
